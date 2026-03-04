@@ -16,7 +16,6 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Generate session ID
     setSessionId(`session-${Date.now()}`)
   }, [])
 
@@ -65,14 +64,14 @@ export default function Chat() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="border-b bg-white p-4">
+      <div className="border-b border-border bg-card p-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Bot className="w-6 h-6 text-blue-600" />
+          <div className="p-2 bg-primary/10 rounded-sm">
+            <Bot className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">Architecture Assistant</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-xl font-semibold text-foreground">Architecture Assistant</h1>
+            <p className="text-sm text-muted-foreground">
               {document ? `Context: ${document.filename}` : 'Ask questions about architecture'}
             </p>
           </div>
@@ -81,9 +80,9 @@ export default function Chat() {
 
       {/* Document Context Banner */}
       {document && (
-        <div className="bg-blue-50 border-b border-blue-100 px-4 py-3">
+        <div className="bg-primary/5 border-b border-primary/20 px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-blue-700">
+            <div className="flex items-center gap-2 text-primary">
               <FileText className="w-4 h-4" />
               <span className="text-sm font-medium">
                 Using context from: {document.metadata?.name || document.filename}
@@ -91,14 +90,14 @@ export default function Chat() {
             </div>
             <button
               onClick={() => setShowContext(!showContext)}
-              className="text-xs text-blue-600 hover:text-blue-800 underline"
+              className="btn-ghost text-xs"
             >
               {showContext ? 'Hide context' : 'View context'}
             </button>
           </div>
           {showContext && (
-            <div className="mt-3 p-3 bg-white rounded border border-blue-200 max-h-48 overflow-auto">
-              <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono">
+            <div className="mt-3 p-3 bg-card rounded-sm border border-border max-h-48 overflow-auto">
+              <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-mono">
                 {document.content}
               </pre>
             </div>
@@ -109,9 +108,9 @@ export default function Chat() {
       {/* Messages */}
       <div className="flex-1 overflow-auto p-4 space-y-4">
         {messages.length === 0 && (
-          <div className="text-center py-12">
-            <Bot className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">
+          <div className="text-center py-12 animate-fade-in">
+            <Bot className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+            <p className="text-muted-foreground">
               {document
                 ? "Ask questions about this document or architecture design."
                 : "Upload a document or ask general architecture questions."}
@@ -125,22 +124,22 @@ export default function Chat() {
             className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : ''}`}
           >
             {msg.role === 'assistant' && (
-              <div className="p-2 bg-gray-100 rounded-full h-fit">
-                <Bot className="w-4 h-4 text-gray-600" />
+              <div className="p-2 bg-muted rounded-full h-fit">
+                <Bot className="w-4 h-4 text-muted-foreground" />
               </div>
             )}
             <div
-              className={`max-w-[70%] rounded-lg px-4 py-3 ${
+              className={`max-w-[70%] rounded-sm px-4 py-3 ${
                 msg.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white border shadow-sm'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-card border border-border shadow-sm'
               }`}
             >
               <p className="whitespace-pre-wrap">{msg.content}</p>
             </div>
             {msg.role === 'user' && (
-              <div className="p-2 bg-blue-600 rounded-full h-fit">
-                <User className="w-4 h-4 text-white" />
+              <div className="p-2 bg-primary rounded-full h-fit">
+                <User className="w-4 h-4 text-primary-foreground" />
               </div>
             )}
           </div>
@@ -148,11 +147,11 @@ export default function Chat() {
 
         {isLoading && (
           <div className="flex gap-3">
-            <div className="p-2 bg-gray-100 rounded-full h-fit">
-              <Bot className="w-4 h-4 text-gray-600" />
+            <div className="p-2 bg-muted rounded-full h-fit">
+              <Bot className="w-4 h-4 text-muted-foreground" />
             </div>
-            <div className="bg-white border shadow-sm rounded-lg px-4 py-3">
-              <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+            <div className="bg-card border border-border shadow-sm rounded-sm px-4 py-3">
+              <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
             </div>
           </div>
         )}
@@ -161,21 +160,21 @@ export default function Chat() {
       </div>
 
       {/* Input */}
-      <div className="border-t bg-white p-4">
+      <div className="border-t border-border bg-card p-4">
         <div className="flex gap-2">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask about architecture, reference models, or your document..."
-            className="flex-1 border rounded-lg px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-editorial flex-1 resize-none"
             rows={1}
             disabled={isLoading}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

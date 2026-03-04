@@ -59,32 +59,30 @@ export default function Dashboard() {
   const importedDocs = documents.filter(d => d.source === 'bac')
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Upload documents or view imported use cases from BAC</p>
+    <div className="p-8 overflow-auto">
+      <div className="mb-8 animate-fade-in">
+        <h1 className="text-3xl font-semibold text-foreground">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">Upload documents or view imported use cases from BAC</p>
       </div>
 
       {/* Upload Area */}
       <div
-        className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-          dragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
-        }`}
+        className={`upload-zone animate-fade-in stagger-1 ${dragOver ? 'dragover' : ''}`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
       >
         {isUploading ? (
           <div className="flex flex-col items-center">
-            <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-            <p className="mt-4 text-gray-600">Processing document...</p>
+            <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            <p className="mt-4 text-muted-foreground">Processing document...</p>
           </div>
         ) : (
           <>
-            <Upload className="w-12 h-12 text-gray-400 mx-auto" />
-            <p className="mt-4 text-lg text-gray-600">
+            <Upload className="w-12 h-12 text-muted-foreground/50" />
+            <p className="mt-4 text-lg text-muted-foreground">
               Drag and drop a PDF here, or{' '}
-              <label className="text-blue-600 hover:underline cursor-pointer">
+              <label className="text-primary hover:underline cursor-pointer">
                 browse
                 <input
                   type="file"
@@ -94,56 +92,56 @@ export default function Dashboard() {
                 />
               </label>
             </p>
-            <p className="text-sm text-gray-400 mt-2">PDF files only, max 16MB</p>
+            <p className="text-sm text-muted-foreground/60 mt-2">PDF files only, max 16MB</p>
           </>
         )}
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mt-8">
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
-          <p className="text-sm text-gray-500">Total Documents</p>
-          <p className="text-3xl font-bold text-gray-900">{documents.length}</p>
+        <div className="card-editorial p-6 animate-fade-in stagger-2">
+          <p className="text-sm text-muted-foreground">Total Documents</p>
+          <p className="text-3xl font-semibold text-foreground">{documents.length}</p>
         </div>
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
-          <p className="text-sm text-gray-500">Uploaded</p>
-          <p className="text-3xl font-bold text-blue-600">{uploadedDocs.length}</p>
+        <div className="card-editorial p-6 animate-fade-in stagger-3">
+          <p className="text-sm text-muted-foreground">Uploaded</p>
+          <p className="text-3xl font-semibold text-primary">{uploadedDocs.length}</p>
         </div>
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
-          <p className="text-sm text-gray-500">Imported from BAC</p>
-          <p className="text-3xl font-bold text-green-600">{importedDocs.length}</p>
+        <div className="card-editorial p-6 animate-fade-in stagger-4">
+          <p className="text-sm text-muted-foreground">Imported from BAC</p>
+          <p className="text-3xl font-semibold text-emerald-600">{importedDocs.length}</p>
         </div>
       </div>
 
       {/* Document Lists */}
       {isLoading ? (
-        <div className="mt-8 text-center text-gray-500">Loading documents...</div>
+        <div className="mt-8 text-center text-muted-foreground">Loading documents...</div>
       ) : (
         <>
           {/* Imported from BAC */}
           {importedDocs.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Imported from BAC</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-4">Imported from BAC</h2>
               <div className="grid grid-cols-2 gap-4">
-                {importedDocs.map(doc => (
+                {importedDocs.map((doc, idx) => (
                   <div
                     key={doc.id}
-                    className="bg-white rounded-lg p-4 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
+                    className={`card-editorial p-4 cursor-pointer animate-fade-in stagger-${Math.min(idx + 1, 5)}`}
                     onClick={() => navigate(`/chat?doc=${doc.id}`)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <FileText className="w-5 h-5 text-green-600" />
+                      <div className="p-2 bg-emerald-100 rounded-sm">
+                        <FileText className="w-5 h-5 text-emerald-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
+                        <p className="font-medium text-foreground truncate">
                           {doc.metadata?.name || doc.filename}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           {new Date(doc.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <ArrowRight className="w-5 h-5 text-gray-400" />
+                      <ArrowRight className="w-5 h-5 text-muted-foreground" />
                     </div>
                   </div>
                 ))}
@@ -154,25 +152,25 @@ export default function Dashboard() {
           {/* Uploaded Documents */}
           {uploadedDocs.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Uploaded Documents</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-4">Uploaded Documents</h2>
               <div className="grid grid-cols-2 gap-4">
-                {uploadedDocs.map(doc => (
+                {uploadedDocs.map((doc, idx) => (
                   <div
                     key={doc.id}
-                    className="bg-white rounded-lg p-4 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
+                    className={`card-editorial p-4 cursor-pointer animate-fade-in stagger-${Math.min(idx + 1, 5)}`}
                     onClick={() => navigate(`/chat?doc=${doc.id}`)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <FileText className="w-5 h-5 text-blue-600" />
+                      <div className="p-2 bg-primary/10 rounded-sm">
+                        <FileText className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{doc.filename}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium text-foreground truncate">{doc.filename}</p>
+                        <p className="text-sm text-muted-foreground">
                           {new Date(doc.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <ArrowRight className="w-5 h-5 text-gray-400" />
+                      <ArrowRight className="w-5 h-5 text-muted-foreground" />
                     </div>
                   </div>
                 ))}
@@ -181,7 +179,7 @@ export default function Dashboard() {
           )}
 
           {documents.length === 0 && (
-            <div className="mt-8 text-center py-12 text-gray-500">
+            <div className="mt-8 text-center py-12 text-muted-foreground">
               No documents yet. Upload a PDF or import from BAC.
             </div>
           )}
