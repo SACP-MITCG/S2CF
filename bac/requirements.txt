@@ -1,0 +1,49 @@
+# BAC - Business Analysis Copilot
+# Core Flask dependencies
+Flask==3.1.0
+Flask-Cors>=4.0.0
+python-dotenv>=1.0.0
+Werkzeug>=3.0.0
+
+# AI/LLM
+openai>=1.0.0
+langchain>=0.3.0
+langchain-openai>=0.3.0
+langchain-community>=0.3.0
+tiktoken>=0.5.0
+
+# Document processing
+markitdown>=0.1.0
+PyMuPDF>=1.23.0
+pdfminer.six>=20221105
+python-pptx>=0.6.0
+openpyxl>=3.1.0
+mammoth>=1.6.0
+
+# Vector store (for RAG)
+pinecone-client>=3.0.0
+
+# NLP
+spacy>=3.7.0
+
+# Data handling
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+orjson>=3.9.0
+
+# Database
+Flask-SQLAlchemy>=3.1.0
+SQLAlchemy>=2.0.0
+psycopg2-binary>=2.9.0
+
+# HTTP client
+requests>=2.31.0
+httpx>=0.25.0
+
+# Utilities
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+Pillow>=10.0.0
+
+# Word export
+python-docx>=1.0.0
