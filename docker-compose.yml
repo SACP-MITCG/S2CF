@@ -1,0 +1,138 @@
+# SACP Unified Docker Compose
+# Orchestrates BAC, SAC, PostgreSQL, and Redis services
+
+services:
+  # PostgreSQL Database with pgvector extension
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: sacp-postgres
+    environment:
+      POSTGRES_DB: sacp
+      POSTGRES_USER: sacp
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-localdev}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sacp -d sacp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sacp-network
+
+  # Redis for session storage and caching
+  redis:
+    image: redis:7-alpine
+    container_name: sacp-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sacp-network
+
+  # Business Analysis Co-Pilot (BAC)
+  bac:
+    build:
+      context: ./bac
+      dockerfile: Dockerfile
+    container_name: sacp-bac
+    ports:
+      - "5001:5001"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://sacp:${DB_PASSWORD:-localdev}@postgres:5432/sacp
+      - REDIS_URL=redis://redis:6379
+      - FLASK_ENV=${FLASK_ENV:-development}
+    volumes:
+      - bac-uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/api/usecases')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - sacp-network
+
+  # Solution Architecture Co-Pilot (SAC) - Backend
+  sac-backend:
+    build:
+      context: ./sac/backend
+      dockerfile: Dockerfile
+    container_name: sac-backend
+    ports:
+      - "5002:5000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://sacp:${DB_PASSWORD:-localdev}@postgres:5432/sacp
+      - REDIS_URL=redis://redis:6379
+      - FLASK_ENV=${FLASK_ENV:-development}
+      # OpenAI configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
+      - OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL:-text-embedding-3-large}
+      - OPENAI_EMBEDDING_DIMENSIONS=${OPENAI_EMBEDDING_DIMENSIONS:-1024}
+    volumes:
+      - sac-uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - sacp-network
+
+  # Solution Architecture Co-Pilot (SAC) - Frontend
+  sac-frontend:
+    build:
+      context: ./sac/frontend
+      dockerfile: Dockerfile
+    container_name: sac-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - sac-backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - sacp-network
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+  bac-uploads:
+    driver: local
+  sac-uploads:
+    driver: local
+
+networks:
+  sacp-network:
+    driver: bridge
